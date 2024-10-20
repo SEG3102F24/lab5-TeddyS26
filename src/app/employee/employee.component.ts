@@ -1,15 +1,15 @@
-import {Component, inject} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, Validators, ReactiveFormsModule } from "@angular/forms";
-import {EmployeeService} from "../service/employee.service";
+import { EmployeeService } from "../service/employee.service";
 import { Router, RouterLink } from "@angular/router";
-import {Employee} from "../model/employee";
+import { Employee } from "../model/employee";
 
 @Component({
-    selector: 'app-employee',
-    templateUrl: './employee.component.html',
-    styleUrls: ['./employee.component.css'],
-    standalone: true,
-    imports: [RouterLink, ReactiveFormsModule]
+  selector: 'app-employee',
+  templateUrl: './employee.component.html',
+  styleUrls: ['./employee.component.css'],
+  standalone: true,
+  imports: [RouterLink, ReactiveFormsModule]
 })
 export class EmployeeComponent {
   private builder: FormBuilder = inject(FormBuilder);
@@ -24,22 +24,42 @@ export class EmployeeComponent {
     email: ['', Validators.email]
   });
 
-  get name(): AbstractControl<string> {return <AbstractControl<string>>this.employeeForm.get('name'); }
-  get dateOfBirth(): AbstractControl<string> {return <AbstractControl<string>>this.employeeForm.get('dateOfBirth'); }
-  get city(): AbstractControl<string> {return <AbstractControl>this.employeeForm.get('city'); }
-  get salary(): AbstractControl<number> {return <AbstractControl<number>>this.employeeForm.get('salary'); }
-  get gender(): AbstractControl<string> {return <AbstractControl<string>>this.employeeForm.get('gender'); }
-  get email(): AbstractControl<string> {return <AbstractControl<string>>this.employeeForm.get('email'); }
+  get name(): AbstractControl<string> { return <AbstractControl<string>>this.employeeForm.get('name'); }
+  get dateOfBirth(): AbstractControl<string> { return <AbstractControl<string>>this.employeeForm.get('dateOfBirth'); }
+  get city(): AbstractControl<string> { return <AbstractControl>this.employeeForm.get('city'); }
+  get salary(): AbstractControl<number> { return <AbstractControl<number>>this.employeeForm.get('salary'); }
+  get gender(): AbstractControl<string> { return <AbstractControl<string>>this.employeeForm.get('gender'); }
+  get email(): AbstractControl<string> { return <AbstractControl<string>>this.employeeForm.get('email'); }
 
   onSubmit() {
+    console.log(this.employeeForm.value);
+
     const employee: Employee = new Employee(this.name.value,
-      new Date(this.dateOfBirth.value),
+      new Date(this.dateOfBirth.value).toISOString(),
       this.city.value,
       this.salary.value,
       this.gender.value,
       this.email.value);
-    this.employeeService.addEmployee(employee);
-    this.employeeForm.reset();
-    this.router.navigate(['/employees']).then(() => {});
+
+    const employeeData = {
+      name: employee.name,
+      dateOfBirth: employee.dateOfBirth,
+      city: employee.city,
+      salary: employee.salary,
+      gender: employee.gender,
+      email: employee.email
+    };
+
+    console.log(employeeData);
+
+    this.employeeService.addEmployee(employeeData)
+      .then(() => {
+        console.log('Employee added successfully!');
+        this.employeeForm.reset();
+        this.router.navigate(['/employees']).then(() => { });
+      })
+      .catch((error) => {
+        console.error('Error adding employee:', error);
+      });
   }
 }
